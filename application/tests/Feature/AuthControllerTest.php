@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthControllerTest extends TestCase
 {
@@ -33,5 +34,28 @@ class AuthControllerTest extends TestCase
         $this->assertEquals('Authorized', $response->json('message'));
         $this->assertTrue(auth()->check());
         $this->assertEquals($user->id, auth()->user()->id);
+    }
+
+    public function testUserCanLogout()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $token = JWTAuth::fromUser($user);
+
+        $this->assertTrue(auth()->check());
+        $this->assertEquals($user->id, auth()->user()->id);
+
+        $response = $this->postJson(
+            '/api/logout',
+            [],
+            [
+                'Authorization' => 'Bearer ' . $token
+            ]
+        );
+
+        $response->assertStatus(200);
+        $this->assertFalse(auth()->check());
     }
 }
