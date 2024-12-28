@@ -10,11 +10,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthControllerTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
+    use WithFaker, RefreshDatabase;
+
     public function testShouldBeAbleToLogin()
     {
         $user = User::factory()->create(
@@ -59,5 +56,28 @@ class AuthControllerTest extends TestCase
         $this->assertFalse(auth()->check());
     }
 
-    public testShould
+    public function testShouldBeAbleToRegisterANewUserInTheApplication()
+    {
+        $name = $this->faker->name;
+        $email = $this->faker->unique()->freeEmail;
+
+        $payload = [
+            'name' => $name,
+            'email' => $email,
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ];
+
+        $response = $this->postJson('/api/register', $payload);
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas('users', [
+            'name' => $name,
+            'email' => $email,
+        ]);
+
+        $this->assertDatabaseCount('users', 1);
+        $this->assertTrue(auth()->check());
+        $this->assertEquals(User::first()->id, auth()->user()->id);
+    }
 }
