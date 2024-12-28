@@ -36,7 +36,7 @@ class AuthControllerTest extends TestCase
         $this->assertEquals($user->id, auth()->user()->id);
     }
 
-    public function testUserCanLogout()
+    public function testShouldBeAbleToLogoutOfTheApplication()
     {
         $user = User::factory()->create();
 
@@ -58,4 +58,6 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(200);
         $this->assertFalse(auth()->check());
     }
+
+    public testShould
 }
